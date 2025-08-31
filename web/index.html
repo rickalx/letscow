@@ -1,0 +1,859 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hagamos Vaca – dApp</title>
+  <style>
+    :root {
+      --pad: 16px;
+      --radius: 14px;
+      --max: 760px;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial
+    }
+
+    body {
+      margin: 0;
+      background: #0f1216;
+      color: #e9eef5
+    }
+
+    .wrap {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 24px
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0 24px
+    }
+
+    .logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: #1f6feb;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      margin: 0
+    }
+
+    .card {
+      background: #151a21;
+      border: 1px solid #232a34;
+      border-radius: var(--radius);
+      padding: var(--pad);
+      margin-bottom: 14px
+    }
+
+    .title {
+      font-size: 1.2rem;
+      margin: 0 0 8px
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 6px;
+      font-weight: 600
+    }
+
+    input,
+    button {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid #2a3340;
+      background: #0f1319;
+      color: #e9eef5;
+      font-size: 1.02rem
+    }
+
+    input:disabled,
+    button:disabled {
+      opacity: .6
+    }
+
+    button.primary {
+      background: #1f6feb;
+      border: 1px solid #2a79ff;
+      font-weight: 700
+    }
+
+    button.ghost {
+      background: transparent;
+      border: 1px solid #2a3340
+    }
+
+    .row {
+      display: flex;
+      gap: 10px
+    }
+
+    .row>* {
+      flex: 1
+    }
+
+    .pill {
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid #2a3340;
+      display: inline-flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 6px
+    }
+
+    .item {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      border: 1px solid #232a34;
+      border-radius: 12px;
+      background: #0f1319
+    }
+
+    .addr {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: .95rem
+    }
+
+    .muted {
+      opacity: .75
+    }
+
+    .right {
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px
+    }
+
+    .chip {
+      border: 1px solid #2a3340;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: .9rem
+    }
+
+    .progress {
+      height: 8px;
+      background: #0a0d12;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #232a34
+    }
+
+    .progress>div {
+      height: 100%;
+      background: #1f6feb;
+      width: 0%
+    }
+
+    footer {
+      margin: 24px 0 8px;
+      font-size: .9rem;
+      opacity: .7;
+      text-align: center
+    }
+
+    .danger {
+      color: #ff6b6b
+    }
+
+    .success {
+      color: #22c55e
+    }
+
+    .small {
+      font-size: .9rem
+    }
+
+    .mode-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px
+    }
+
+    .mode-btn {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid #2a3340;
+      border-radius: 12px;
+      background: #0f1319;
+      cursor: pointer
+    }
+
+    .mode-btn.active {
+      outline: 2px solid #2a79ff;
+      border-color: #2a79ff;
+      background: #101825
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">💸</div>
+      <h1>Hagamos Vaca</h1>
+    </header>
+
+    <!-- Stepper -->
+    <div class="card">
+      <div class="chips" id="stepChips"></div>
+    </div>
+
+    <!-- Paso 1: Evento -->
+    <div class="card" id="step1">
+      <p class="title">¿Para qué es la vaca?</p>
+      <label>Nombre del evento</label>
+      <input id="eventName" placeholder="Cena en La Bodega" />
+      <div class="row" style="margin-top:10px">
+        <button class="ghost" disabled>Anterior</button>
+        <button class="primary" id="next1">Siguiente</button>
+      </div>
+    </div>
+
+    <!-- Paso 2: Monto -->
+    <div class="card" id="step2" style="display:none">
+      <p class="title">¿De cuánto es la vaca?</p>
+      <label>Monto total (ETH en cadena)</label>
+      <input id="totalEth" type="number" min="0" step="0.000000000000000001" placeholder="e.g. 1.25" />
+      <div class="muted small" style="margin-top:6px">
+        En cadena usamos ETH (no USD). Ej: 100 wei = 0.0000000000000001 ETH.
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="ghost" id="back2">Anterior</button>
+        <button class="primary" id="next2">Siguiente</button>
+      </div>
+    </div>
+
+    <!-- Paso 3: Principal + despliegue -->
+    <div class="card" id="step3" style="display:none">
+      <p class="title">Dirección del principal y despliegue</p>
+      <label>Wallet del usuario principal</label>
+      <input id="principalAddr" placeholder="0x..." />
+      <label>Porcentaje del principal (%)</label>
+      <input id="principalPct" type="number" min="0" max="100" step="1" placeholder="Ej. 0 o 30" />
+      <div class="muted small" style="margin-top:6px">
+        Se desplegarán <b>UserManagement</b>, <b>PaymentHandler</b> y <b>MainContract</b> con estos datos.
+      </div>
+      <div id="deployMsg" class="small muted" style="margin-top:8px"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="ghost" id="back3a">Anterior</button>
+        <button class="primary" id="deployContracts">Desplegar contratos</button>
+      </div>
+      <div class="list" id="deployedAddrs" style="display:none;margin-top:12px"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="ghost" disabled>—</button>
+        <button class="primary" id="next3" disabled>Continuar</button>
+      </div>
+    </div>
+
+    <!-- Paso 4: Agregar amigos -->
+    <div class="card" id="step4" style="display:none">
+      <p class="title">Agregar amigos</p>
+      <label>Wallet de Ethereum</label>
+      <div class="row">
+        <input id="friendAddr" placeholder="0x..." />
+        <button class="ghost" id="btnAddFriend">Agregar</button>
+      </div>
+      <div class="list" id="friendsList"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="ghost" id="back4">Anterior</button>
+        <button class="primary" id="next4">Siguiente</button>
+      </div>
+    </div>
+
+    <!-- Paso 5: Modo (botones) -->
+    <div class="card" id="step5" style="display:none">
+      <p class="title">¿Cómo quieren dividir?</p>
+      <div class="mode-buttons">
+        <div class="mode-btn" id="btnModeProp">
+          <div>
+            <strong>Proporcional</strong>
+            <div class="muted small">Asigna manualmente los % de amigos (recomendado: amigos = 100 − % del principal).
+            </div>
+          </div>
+          <div>➤</div>
+        </div>
+        <div class="mode-btn" id="btnModeEq">
+          <div>
+            <strong>Igualitario (reparte el remanente)</strong>
+            <div class="muted small">Reparte <b>(100 − % del principal)</b> entre los amigos por igual.</div>
+          </div>
+          <div>➤</div>
+        </div>
+      </div>
+      <div id="modeNote" class="small muted" style="margin-top:8px"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="ghost" id="back5">Anterior</button>
+        <button class="primary" id="next5">Siguiente</button>
+      </div>
+    </div>
+
+    <!-- Paso 6: Porcentajes -->
+    <div class="card" id="step6" style="display:none">
+      <p class="title" id="step6Title">Definir proporciones</p>
+      <div id="principalInfo" class="muted small"></div>
+      <div id="percentList" class="list" style="margin-top:10px"></div>
+      <div style="margin:10px 0">
+        <div class="row small">
+          <div>Total asignado a amigos</div>
+          <div id="sumPct" style="text-align:right">0%</div>
+        </div>
+        <div class="progress">
+          <div id="progressPct"></div>
+        </div>
+      </div>
+      <div id="pctWarning" class="danger small" style="display:none;margin:6px 0"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="ghost" id="back6">Anterior</button>
+        <button class="primary" id="next6" disabled>Siguiente</button>
+      </div>
+    </div>
+
+    <!-- Paso 7: Confirmación (con validación de principal) -->
+    <div class="card" id="step7" style="display:none">
+      <p class="title">Revisar y confirmar</p>
+      <div id="summary"></div>
+      <div id="principalCheck" class="danger small" style="margin-top:8px;display:none"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="ghost" id="back7">Anterior</button>
+        <button class="primary" id="confirm" disabled>Confirmar Vaca</button>
+      </div>
+      <div id="txStatus" class="small muted" style="margin-top:8px"></div>
+    </div>
+
+    <!-- Paso 8: Estado -->
+    <div class="card" id="step8" style="display:none">
+      <p class="title">Estado de la Vaca</p>
+
+      <!-- Bloque con dirección del MainContract + copiar -->
+      <div class="item">
+        <div>
+          <div class="muted small">Dirección del contrato (MainContract)</div>
+          <div id="mainAddrShow" class="addr">—</div>
+        </div>
+        <div class="right">
+          <button class="ghost small" id="btnCopyMain">Copiar dirección</button>
+        </div>
+      </div>
+
+      <!-- Links para compartir pago por amigo -->
+      <div class="card" style="margin-top:12px">
+        <p class="title">Compartir links de pago</p>
+        <div id="shareLinks" class="stack"></div>
+        <div class="muted small" style="margin-top:6px">Cada link abre una página para pagar con el mismo estilo.</div>
+      </div>
+
+      <!-- Dashboard -->
+      <div id="dashboard" style="margin-top:12px"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="ghost" id="btnRefresh">Actualizar</button>
+        <button class="primary" id="btnWithdraw" disabled>Retirar al principal</button>
+      </div>
+      <div id="dashMsg" class="small muted" style="margin-top:8px"></div>
+    </div>
+
+    <footer>Esta UI firma transacciones con MetaMask. Prueba en testnet antes de producción.</footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script>
+    // ==== RUTAS DE BYTECODE/ABI (quemados en el repo) ====
+    const BYTECODES_BASE = "../contracts/bytecodes";
+    const PATH_UM = `${BYTECODES_BASE}/UserManagement.json`;
+    const PATH_PH = `${BYTECODES_BASE}/PaymentHandler.json`;
+    const PATH_MAIN = `${BYTECODES_BASE}/MainContract.json`;
+
+    let provider, signer, userAddress;
+    let UM, MAIN, PH;
+    let UM_ADDR = "", MAIN_ADDR = "", PH_ADDR = "";
+    let ABI_UM, ABI_PH, ABI_MAIN, BYTECODE_UM, BYTECODE_PH, BYTECODE_MAIN;
+
+    const state = {
+      eventName: "",
+      totalEth: "",
+      friends: [],
+      mode: "proportional", // "proportional" | "equal"
+      friendsPct: {},       // address -> number
+      principal: null,
+      principalPct: 0
+    };
+
+    // ==== helpers UI ====
+    const $ = (id) => document.getElementById(id);
+    const fmtAddr = (a) => a ? a.slice(0, 6) + "…" + a.slice(-4) : "";
+    const toWei = (eth) => ethers.utils.parseEther(String(eth || "0"));
+    const fromWei = (wei) => ethers.utils.formatEther(wei || "0");
+
+    function setStep(n) {
+      const steps = [1, 2, 3, 4, 5, 6, 7, 8];
+      steps.forEach(s => { $(`step${s}`).style.display = (s === n) ? "block" : "none"; });
+      $("stepChips").innerHTML = steps.map(s => `<span class="chip">${s === n ? '➡ ' : ''}Paso ${s}</span>`).join("");
+    }
+
+    function renderFriends() {
+      const cont = $("friendsList");
+      cont.innerHTML = "";
+      state.friends.forEach(a => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `<div class="addr">${fmtAddr(a)}</div>
+          <div class="right">
+            <button class="ghost small" data-remove="${a}">Quitar</button>
+          </div>`;
+        cont.appendChild(div);
+      });
+      cont.querySelectorAll("[data-remove]").forEach(btn => {
+        btn.onclick = () => {
+          state.friends = state.friends.filter(x => x !== btn.dataset.remove);
+          renderFriends();
+        };
+      });
+    }
+
+    function requiredSumForFriends() {
+      return Math.max(0, 100 - Number(state.principalPct || 0));
+    }
+
+    function renderPercentInputs() {
+      const remainForFriends = requiredSumForFriends();
+      $("principalInfo").innerHTML =
+        `Principal: <span class="addr">${fmtAddr(state.principal)}</span> con <b>${state.principalPct}%</b>.
+         En <b>${state.mode === "equal" ? "Igualitario: amigos " + remainForFriends + "% (reparto equitativo)" : "Proporcional: amigos " + remainForFriends + "% (ajustable)"}</b>.`;
+
+      const cont = $("percentList");
+      cont.innerHTML = "";
+      let sum = 0;
+
+      state.friends.forEach((a, i) => {
+        if (state.mode === "equal") {
+          const base = Math.floor(remainForFriends / state.friends.length);
+          const rem = remainForFriends - base * state.friends.length;
+          state.friendsPct[a] = base + (i === state.friends.length - 1 ? rem : 0);
+        } else {
+          if (typeof state.friendsPct[a] !== "number") state.friendsPct[a] = 0;
+        }
+        sum += Number(state.friendsPct[a] || 0);
+
+        const row = document.createElement("div");
+        row.className = "item";
+        row.innerHTML = `
+          <div>
+            <div class="addr">${fmtAddr(a)}</div>
+            <div class="muted small">Porcentaje</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="number" min="0" max="100" step="1" style="width:110px"
+                   ${state.mode === "equal" ? "disabled" : ""}
+                   value="${state.friendsPct[a]}"
+                   data-pct="${a}"/>
+            <span>%</span>
+          </div>
+        `;
+        cont.appendChild(row);
+      });
+
+      cont.querySelectorAll("[data-pct]").forEach(inp => {
+        inp.oninput = () => {
+          state.friendsPct[inp.dataset.pct] = Number(inp.value || 0);
+          renderPercentInputs();
+        }
+      });
+
+      $("sumPct").innerText = `${sum}%`;
+      $("progressPct").style.width = `${Math.min(100, (sum / (remainForFriends || 1)) * 100)}%`;
+
+      let ok = (sum === remainForFriends);
+      let warn = ok ? "" : `La suma de porcentajes de amigos debe ser exactamente ${remainForFriends}%`;
+      $("pctWarning").innerText = warn;
+      $("pctWarning").style.display = warn ? "block" : "none";
+      $("next6").disabled = !ok;
+    }
+
+    function renderSummary() {
+      const remainForFriends = requiredSumForFriends();
+      const lines = [];
+      lines.push(`<div class="item"><div>Evento</div><div><b>${state.eventName}</b></div></div>`);
+      lines.push(`<div class="item"><div>Total (ETH)</div><div><b>${state.totalEth}</b></div></div>`);
+      lines.push(`<div class="item"><div>Modo</div><div><b>${state.mode === "equal" ? "Igualitario (amigos reparten " + remainForFriends + "%)" : "Proporcional (amigos reparten " + remainForFriends + "%)"}</b></div></div>`);
+      lines.push(`<div class="item"><div>Principal</div><div class="addr">${fmtAddr(state.principal)} — ${state.principalPct}%</div></div>`);
+      lines.push(`<div class="item"><div>Amigos (deben sumar ${remainForFriends}%)</div><div>${state.friends.length}</div></div>`);
+      state.friends.forEach(a => {
+        const pct = state.friendsPct[a] || 0;
+        const dueEth = (Number(state.totalEth || 0) * pct) / 100;
+        lines.push(`<div class="item">
+          <div class="addr">${fmtAddr(a)}</div>
+          <div class="right"><div>${pct}%</div><div class="pill">${dueEth} ETH</div></div>
+        </div>`);
+      });
+      $("summary").innerHTML = lines.join("");
+    }
+
+    async function renderDashboard() {
+  $("dashboard").innerHTML = "⏳ Cargando estado…";
+  const now = new Date().toLocaleTimeString();
+
+  try {
+    await ensureConnected();
+    if (!UM || !MAIN) await bindInstances();
+
+    const [users, totalDues, paids, remainings] = await MAIN.getAllUsersStatus();
+
+    const rows = [];
+    users.forEach((u, i) => {
+      rows.push(`<div class="item">
+        <div>
+          <div class="addr">${fmtAddr(u)}</div>
+          <div class="muted small">Debe: ${fromWei(totalDues[i])} • Pagó: ${fromWei(paids[i])}</div>
+        </div>
+        <div class="right">
+          <div class="pill ${remainings[i].gt(0) ? 'danger' : ''}">
+            Restante: ${fromWei(remainings[i])} ETH
+          </div>
+          ${(u.toLowerCase() === userAddress?.toLowerCase() && remainings[i].gt(0))
+            ? `<button class="primary small" data-pay="${remainings[i].toString()}">Pagar</button>` : ``}
+        </div>
+      </div>`);
+    });
+    $("dashboard").innerHTML = rows.join("");
+
+    $("mainAddrShow").innerText = MAIN_ADDR || "—";
+
+    // Links de pago
+    const remainingByAddr = {};
+    users.forEach((u, i) => {
+      remainingByAddr[u.toLowerCase()] = fromWei(remainings[i]);
+    });
+
+    const share = $("shareLinks");
+    share.innerHTML = "";
+    state.friends.forEach(a => {
+      const suggestedAmountEth = remainingByAddr[a.toLowerCase()] || "0";
+      const url = buildPaymentLink(MAIN_ADDR, a, suggestedAmountEth);
+
+      const row = document.createElement("div");
+      row.className = "item";
+      row.innerHTML = `
+        <div>
+          <div class="muted small">Amigo</div>
+          <div class="addr">${fmtAddr(a)}</div>
+          <div class="small">Sugerido: ${suggestedAmountEth} ETH</div>
+        </div>
+        <div class="right">
+          <button class="primary small" data-copy="${url}">Copiar link</button>
+        </div>`;
+      share.appendChild(row);
+    });
+
+    const totalCollected = await MAIN.totalCollected();
+    const expected = await MAIN.getTotalExpectedFromOthers();
+    $("btnWithdraw").disabled = totalCollected.lt(expected);
+
+    // Listeners para botones
+    document.querySelectorAll("[data-pay]").forEach(btn => {
+      btn.onclick = async () => {
+        try {
+          const value = btn.dataset.pay;
+          const tx = await MAIN.payShare({ value });
+          $("dashMsg").innerText = "Enviando pago…";
+          await tx.wait();
+          $("dashMsg").innerText = "✅ Pago confirmado";
+          renderDashboard();
+        } catch (e) {
+          $("dashMsg").innerText = "❌ Error al pagar: " + (e?.reason || e?.message);
+        }
+      };
+    });
+
+    document.querySelectorAll("[data-copy]").forEach(btn => {
+      btn.onclick = () => copyToClipboard(btn.dataset.copy);
+    });
+
+    $("dashMsg").innerText = `✅ Última actualización: ${now}`;
+
+  } catch (e) {
+    console.error("Error en renderDashboard()", e);
+    $("dashboard").innerHTML = "<div class='danger'>❌ Error al cargar el estado: " + (e?.reason || e?.message || e) + "</div>";
+    $("dashMsg").innerText = "❌ Falló la actualización";
+  }
+}
+
+    // ==== utilidades ====
+    function copyToClipboard(text) {
+      navigator.clipboard?.writeText(text).then(() => {
+        alert("Copiado al portapapeles");
+      }).catch(() => {
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); alert("Copiado al portapapeles"); } catch (e) { alert("No se pudo copiar"); }
+        document.body.removeChild(ta);
+      });
+    }
+
+    function buildPaymentLink(mainAddress, friendAddress, amountEth) {
+      const base = window.location.origin + window.location.pathname.replace(/index\.html$/i, '');
+      // asume payment.html en misma carpeta que index.html
+      const params = new URLSearchParams({
+        main: mainAddress || "",
+        user: friendAddress || "",
+      });
+      if (amountEth && Number(amountEth) > 0) params.set("amount", String(amountEth));
+      return `${base}payment.html?${params.toString()}`;
+    }
+
+
+    // ==== conexión ====
+    async function ensureConnected() {
+      if (!window.ethereum) { alert("Instala MetaMask para continuar."); throw new Error("No Ethereum"); }
+      if (!provider) {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        userAddress = (await signer.getAddress()).toLowerCase();
+      }
+      return { provider, signer };
+    }
+
+    async function bindInstances() {
+      UM = new ethers.Contract(UM_ADDR, ABI_UM, signer);
+      PH = new ethers.Contract(PH_ADDR, ABI_PH, signer);
+      MAIN = new ethers.Contract(MAIN_ADDR, ABI_MAIN, signer);
+    }
+
+    // ==== cargar ABI+bytecode (quemados) ====
+    async function loadBytecodes() {
+      const [um, ph, main] = await Promise.all([
+        fetch(PATH_UM).then(r => r.json()),
+        fetch(PATH_PH).then(r => r.json()),
+        fetch(PATH_MAIN).then(r => r.json()),
+      ]);
+      ABI_UM = um.abi; BYTECODE_UM = um.bytecode;
+      ABI_PH = ph.abi; BYTECODE_PH = ph.bytecode;
+      ABI_MAIN = main.abi; BYTECODE_MAIN = main.bytecode;
+      if (!BYTECODE_UM || !BYTECODE_MAIN || !BYTECODE_PH) throw new Error("Bytecode/ABI no encontrados. Verifica archivos en contracts/bytecodes/*.json");
+    }
+
+    // ==== despliegue ====
+    async function deployAll(principal, principalPct) {
+      $("deployMsg").innerText = "⏳ Cargando bytecode/ABI…";
+      await loadBytecodes();
+      $("deployMsg").innerText = "⏳ Conectando wallet…";
+      await ensureConnected();
+
+      $("deployMsg").innerText = "⏳ Desplegando UserManagement…";
+      const UMFactory = new ethers.ContractFactory(ABI_UM, BYTECODE_UM, signer);
+      const um = await UMFactory.deploy(principal, principalPct);
+      await um.deployed();
+
+      $("deployMsg").innerText = "⏳ Desplegando PaymentHandler…";
+      const PHFactory = new ethers.ContractFactory(ABI_PH, BYTECODE_PH, signer);
+      const ph = await PHFactory.deploy();
+      await ph.deployed();
+
+      $("deployMsg").innerText = "⏳ Desplegando MainContract…";
+      const MAINFactory = new ethers.ContractFactory(ABI_MAIN, BYTECODE_MAIN, signer);
+      const main = await MAINFactory.deploy(um.address, ph.address);
+      await main.deployed();
+
+      UM_ADDR = um.address; PH_ADDR = ph.address; MAIN_ADDR = main.address;
+      await bindInstances();
+
+      state.principal = principal;
+      state.principalPct = Number(principalPct);
+
+      $("deployedAddrs").style.display = "block";
+      $("deployedAddrs").innerHTML = `
+        <div class="item"><div>UserManagement</div><div class="addr">${fmtAddr(UM_ADDR)}</div></div>
+        <div class="item"><div>PaymentHandler</div><div class="addr">${fmtAddr(PH_ADDR)}</div></div>
+        <div class="item"><div>MainContract</div><div class="addr">${fmtAddr(MAIN_ADDR)}</div></div>
+      `;
+      $("deployMsg").innerText = "✅ Despliegue completado";
+      $("next3").disabled = false;
+    }
+
+    // ==== validación: cuenta del principal (Paso 7) ====
+    async function validatePrincipalSigner() {
+      try {
+        const onchainPrincipal = (await UM.getPrincipalAccount()).toLowerCase();
+        const current = (await signer.getAddress()).toLowerCase();
+        const ok = (onchainPrincipal === current);
+        $("principalCheck").style.display = ok ? "none" : "block";
+        $("principalCheck").innerText = ok
+          ? ""
+          : `Tu wallet conectada (${fmtAddr(current)}) no es la del principal on-chain (${fmtAddr(onchainPrincipal)}). Cambia de cuenta en MetaMask para continuar.`;
+        $("confirm").disabled = !ok;
+        return ok;
+      } catch (e) {
+        $("principalCheck").style.display = "block";
+        $("principalCheck").innerText = "No se pudo validar la cuenta del principal. Revisa conexión y contratos.";
+        $("confirm").disabled = true;
+        return false;
+      }
+    }
+
+    // ==== selección de modo ====
+    function selectMode(mode) {
+      state.mode = mode;
+      $("btnModeProp").classList.toggle("active", mode === "proportional");
+      $("btnModeEq").classList.toggle("active", mode === "equal");
+      const remainForFriends = requiredSumForFriends();
+      $("modeNote").innerText = mode === "equal"
+        ? `Igualitario: los amigos se reparten por igual el remanente (${remainForFriends}%).`
+        : `Proporcional: asigna manualmente (sugerencia: amigos = ${remainForFriends}%).`;
+    }
+
+    // ==== eventos UI ====
+    $("next1").onclick = () => { state.eventName = $("eventName").value.trim() || "Mi Vaca"; setStep(2); };
+    $("back2").onclick = () => setStep(1);
+    $("next2").onclick = () => { state.totalEth = $("totalEth").value.trim(); setStep(3); };
+
+    $("back3a").onclick = () => setStep(2);
+    $("deployContracts").onclick = async () => {
+      try {
+        const principal = $("principalAddr").value.trim();
+        const pct = Number($("principalPct").value);
+        if (!ethers.utils.isAddress(principal)) return alert("Dirección de principal inválida");
+        if (!(pct >= 0 && pct <= 100)) return alert("Porcentaje del principal inválido (0–100)");
+        $("deployMsg").innerText = "Preparando despliegue…";
+        await deployAll(principal, pct);
+      } catch (e) {
+        $("deployMsg").innerText = "❌ Error: " + (e?.reason || e?.message || e);
+      }
+    };
+    $("next3").onclick = () => setStep(4);
+
+    // Paso 4: amigos
+    $("back4").onclick = () => setStep(3);
+    $("btnAddFriend").onclick = () => {
+      const a = $("friendAddr").value.trim();
+      if (!ethers.utils.isAddress(a)) return alert("Dirección inválida");
+      if (state.friends.includes(a)) return alert("Ya está en la lista");
+      if (a.toLowerCase() === state.principal?.toLowerCase()) return alert("El principal no va en amigos");
+      state.friends.push(a);
+      $("friendAddr").value = "";
+      renderFriends();
+    };
+    $("next4").onclick = () => {
+      if (state.friends.length === 0) return alert("Agrega al menos 1 amigo");
+      setStep(5);
+    };
+
+    // Paso 5: modo
+    $("back5").onclick = () => setStep(4);
+    $("btnModeProp").onclick = () => selectMode("proportional");
+    $("btnModeEq").onclick = () => selectMode("equal");
+    $("next5").onclick = async () => {
+      if (!UM || !MAIN) await bindInstances();
+      renderPercentInputs();
+      setStep(6);
+    };
+
+    // Paso 6: porcentajes
+    $("back6").onclick = () => setStep(5);
+    $("next6").onclick = () => { renderSummary(); setStep(7); validatePrincipalSigner(); };
+
+    // Paso 7: confirmación (valida principal)
+    $("back7").onclick = () => setStep(6);
+    $("confirm").onclick = async () => {
+      try {
+        $("txStatus").innerText = "⏳ Validando cuenta del principal…";
+        await ensureConnected();
+        const ok = await validatePrincipalSigner();
+        if (!ok) { $("txStatus").innerText = "❌ La cuenta conectada no es la del principal."; return; }
+
+        $("txStatus").innerText = "⏳ Enviando configuración… (firmará el PRINCIPAL)";
+        const tx1 = await MAIN.setTotalAmount(toWei(state.totalEth));
+        await tx1.wait();
+
+        // Registrar amigos con sus % definidos (revertirá si la suma excede 100 en tu contrato)
+        for (const a of state.friends) {
+          const pct = Number(state.friendsPct[a] || 0);
+          $("txStatus").innerText = `⏳ Añadiendo ${fmtAddr(a)} (${pct}%)…`;
+          const tx = await UM.addUser(a, pct);
+          await tx.wait();
+        }
+
+        $("txStatus").innerText = "✅ Configuración confirmada";
+        setStep(8);
+        await renderDashboard();
+      } catch (e) {
+        $("txStatus").innerText = "❌ Error: " + (e?.reason || e?.message || "falló la transacción");
+      }
+    };
+
+    // Paso 8: dashboard + compartir + copiar dirección
+    $("btnRefresh").onclick = async () => {
+      try {
+        $("dashMsg").innerText = "Actualizando…";
+        await ensureConnected();
+        if (!UM || !MAIN) await bindInstances();
+        await renderDashboard();
+        $("dashMsg").innerText = "";
+      } catch (e) {
+        $("dashMsg").innerText = "❌ No se pudo actualizar: " + (e?.reason || e?.message || e);
+      }
+    };
+    $("btnWithdraw").onclick = async () => {
+      try {
+        $("dashMsg").innerText = "⏳ Enviando retiro…";
+        const tx = await MAIN.withdrawToPrincipal();
+        await tx.wait();
+        $("dashMsg").innerText = "✅ Retiro ejecutado";
+        renderDashboard();
+      } catch (e) {
+        $("dashMsg").innerText = "❌ Error: " + (e?.reason || e?.message);
+      }
+    };
+    $("btnCopyMain").onclick = () => {
+      if (!MAIN_ADDR) return alert("Aún no hay dirección.");
+      copyToClipboard(MAIN_ADDR);
+    };
+
+    // Init
+    setStep(1);
+    selectMode("proportional");
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Pagar – Hagamos Vaca</title>
+  <style>
+    :root { --pad:16px; --radius:14px; --max:520px; }
+    *{box-sizing:border-box;font-family:system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial}
+    body{margin:0;background:#0f1216;color:#e9eef5}
+    .wrap{max-width:var(--max);margin:0 auto;padding:24px}
+    header{display:flex;align-items:center;gap:10px;margin:10px 0 24px}
+    .logo{width:38px;height:38px;border-radius:10px;background:#1f6feb;display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+    h1{font-size:1.4rem;margin:0}
+    .card{background:#151a21;border:1px solid #232a34;border-radius:var(--radius);padding:var(--pad);margin-bottom:14px}
+    label{display:block;margin:10px 0 6px;font-weight:600}
+    input,button{
+      width:100%;padding:12px 14px;border-radius:12px;border:1px solid #2a3340;background:#0f1319;color:#e9eef5;font-size:1.02rem
+    }
+    button.primary{background:#1f6feb;border:1px solid #2a79ff;font-weight:700}
+    .addr{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;font-size:.95rem}
+    .small{font-size:.9rem;opacity:.8}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">💸</div>
+      <h1>Pagar – Hagamos Vaca</h1>
+    </header>
+
+    <div class="card">
+      <div class="small">Contrato (MainContract)</div>
+      <div id="mainAddr" class="addr">—</div>
+      <div class="small" style="margin-top:8px">Tu dirección (conectada)</div>
+      <div id="userAddr" class="addr">—</div>
+    </div>
+
+    <div class="card">
+      <label>Monto a pagar (ETH)</label>
+      <input id="ethAmount" type="number" min="0" step="0.000000000000000001" placeholder="e.g. 0.01" />
+      <button class="primary" style="margin-top:10px" id="btnPay">Pagar ahora</button>
+      <div id="status" class="small" style="margin-top:10px"></div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script>
+    const BYTECODES_BASE = "../contracts/bytecodes";
+    const PATH_MAIN = `${BYTECODES_BASE}/MainContract.json`;
+
+    let provider, signer, mainContract;
+
+    function qs(name){
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name) || "";
+    }
+
+    async function ensureConnected(){
+      if(!window.ethereum){ alert("Instala MetaMask para continuar."); throw new Error("No Ethereum"); }
+      if(!provider){
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+      }
+      return { provider, signer };
+    }
+
+    async function init(){
+    const main = qs("main");
+    const userParam = qs("user");
+    const amountParam = qs("amount"); // <-- nuevo
+
+    document.getElementById("mainAddr").innerText = main || "—";
+    document.getElementById("userAddr").innerText = userParam || "(conecta tu wallet)";
+    if (amountParam) {
+        // Prellenar y mostrar un hint
+        const inp = document.getElementById("ethAmount");
+        inp.value = amountParam;
+        const status = document.getElementById("status");
+        status.innerText = `Sugerencia: pagar ${amountParam} ETH`;
+    }
+
+    if(!main || !ethers.utils.isAddress(main)){
+        document.getElementById("status").innerText = "❌ Link inválido: falta dirección del contrato.";
+        document.getElementById("btnPay").disabled = true;
+        return;
+    }
+
+    try{
+        await ensureConnected();
+        const addr = await signer.getAddress();
+        document.getElementById("userAddr").innerText = addr;
+
+        const mainJson = await fetch(PATH_MAIN).then(r=>r.json());
+        const ABI_MAIN = mainJson.abi;
+
+        mainContract = new ethers.Contract(main, ABI_MAIN, signer);
+    }catch(e){
+        document.getElementById("status").innerText = "❌ Error inicializando: " + (e?.message || e);
+        document.getElementById("btnPay").disabled = true;
+    }
+    }
+
+    // EXACTAMENTE tu función payShare (mensajes en inglés como la pegaste)
+    async function payShare() {
+      const amountEth = document.getElementById("ethAmount").value;
+
+      if (!amountEth || isNaN(amountEth)) {
+        alert("Enter a valid amount in ETH.");
+        return;
+      }
+
+      try {
+        const tx = await mainContract.payShare({
+          value: ethers.utils.parseEther(amountEth),
+        });
+
+        document.getElementById("status").innerText = "Transaction sent... Waiting for confirmation";
+        await tx.wait();
+        document.getElementById("status").innerText = "✅ Payment successful!";
+      } catch (err) {
+        console.error(err);
+        document.getElementById("status").innerText = "❌ Error: " + (err?.reason || err?.message || "Transaction failed");
+      }
+    }
+
+    document.getElementById("btnPay").onclick = payShare;
+
+    init();
+  </script>
+</body>
+</html>
