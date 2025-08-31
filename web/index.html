@@ -407,7 +407,7 @@
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script>
     // ==== RUTAS DE BYTECODE/ABI (quemados en el repo) ====
-    const BYTECODES_BASE = "../public/contracts/bytecodes";
+    const BYTECODES_BASE = "/contracts/bytecodes";
     const PATH_UM = `${BYTECODES_BASE}/UserManagement.json`;
     const PATH_PH = `${BYTECODES_BASE}/PaymentHandler.json`;
     const PATH_MAIN = `${BYTECODES_BASE}/MainContract.json`;
@@ -679,7 +679,7 @@
       ABI_UM = um.abi; BYTECODE_UM = um.bytecode;
       ABI_PH = ph.abi; BYTECODE_PH = ph.bytecode;
       ABI_MAIN = main.abi; BYTECODE_MAIN = main.bytecode;
-      if (!BYTECODE_UM || !BYTECODE_MAIN || !BYTECODE_PH) throw new Error("Bytecode/ABI no encontrados. Verifica archivos en public/contracts/bytecodes/*.json");
+      if (!BYTECODE_UM || !BYTECODE_MAIN || !BYTECODE_PH) throw new Error("Bytecode/ABI no encontrados. Verifica archivos en contracts/bytecodes/*.json");
     }
 
     // ==== despliegue ====
