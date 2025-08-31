@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/contracts/bytecodes/:path*",
+      "destination": "/contracts/bytecodes/:path*"
+    }
+  ]
+}
